@@ -1,3 +1,5 @@
+// This file contains a TCP Echo Server.
+
 #include <sys/socket.h>
 // #include <stdlib.h>
 #include <stdio.h>
@@ -11,8 +13,9 @@ int main() {
 
 	int sockfd = socket(AF_INET6, SOCK_STREAM, 0);
 	// first param is: domain. AF_INET6 (import <sys/socket.h>)
-	// second param is: type. SOCK_STREAM, or the other option is SOCK_DGRM (import <sys/socket.h>)
-	// third param is: protocol. 0 means: default of your default
+	// second param is: type. SOCK_STREAM, or the other option is SOCK_DGRAM (import <sys/socket.h>)
+	// third param is: protocol. 0 means: default protocol.
+	// For SOCK_STREAM, the default protocol is TCP. For SOCK_DGRAM, the default protocol is UDP.
 	// returns a file descriptor (or -1 in case of an error)
 
 	if (sockfd == -1) {
@@ -30,7 +33,7 @@ int main() {
 	struct sockaddr_in6 my_server_address;
 	// this struct has three important attributes:
 	my_server_address.sin6_family = AF_INET6; // what kind of IP address are you using? IPv6
-	my_server_address.sin6_port = htons(5000); // what port are you using? Port 5000.
+	my_server_address.sin6_port = htons(4000); // what port are you using? Port 4000.
 	// the htons function, i.e. the host-to-network-short function, is what we always wrap the port number in.
 	my_server_address.sin6_addr = in6addr_any; // what IP address are you using? Any IP addresss. 
 	// The constant in6addr_any is defined in <netinet/in.h>
@@ -67,10 +70,11 @@ int main() {
 
 	while (1) {
 
+		socklen_t sizeof_client_address = sizeof(my_client_address);
+
 		int clientfd = accept(sockfd, 
 		(struct sockaddr *) &my_client_address, // type casting, just like bind
-		sizeof(my_client_address)
-		);
+		&sizeof_client_address);
 
 		// returns a file descriptor for the client socket (or -1 in case of an error)
 
@@ -93,7 +97,7 @@ int main() {
 			}
 
 			if (bytesRead == 0) { // this means that the client closed the connection. this isn't an error: it's normal.
-				printf("The client closed the connection.");
+				printf("The client closed the connection.\n");
 				break; // terminate the loop
 			}
 
