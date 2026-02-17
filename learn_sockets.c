@@ -2,6 +2,7 @@
 // #include <stdlib.h>
 #include <stdio.h>
 #include <netinet/in.h>
+#include <unistd.h> // this contains read() and write()
 
 
 int main() {
@@ -64,19 +65,46 @@ int main() {
 
 	struct sockaddr_in6 my_client_address;
 
-	int clientfd = accept(sockfd, 
+	while (1) {
+
+		int clientfd = accept(sockfd, 
 		(struct sockaddr *) &my_client_address, // type casting, just like bind
-		&sizeof(my_client_address) // slightly different froom bind: the argument is an address
+		sizeof(my_client_address)
 		);
 
-	// returns a file descriptor for the client socket (or -1 in case of an error)
+		// returns a file descriptor for the client socket (or -1 in case of an error)
 
-	if (clientfd == -1) {
-		perror("Accept failed.\n");
-		return 1;
+		if (clientfd == -1) {
+			// perror("Accept failed.\n");
+			// return 1;
+			continue; // go to the next loop iteration
+		}
+
+		// Now, we learnt read() and write() in learn_io.c. Let's use that knowledge.
+
+		char buffer[128];
+
+		while (1) { // as long as the program is running
+			ssize_t bytesRead = read(clientfd, buffer, 128);
+
+			if (bytesRead == -1) { // error
+				perror("Client reading failed.\n");
+				break;
+			}
+
+			if (bytesRead == 0) { // this means that the client closed the connection. this isn't an error: it's normal.
+				printf("The client closed the connection.");
+				break; // terminate the loop
+			}
+
+			write(clientfd, buffer, bytesRead);
+			// Note: we read from clientfd, and we write to clientfd.
+			// clientfd represents the client we are connected to.
+
+		}
+
+		close(clientfd);
 	}
-
-
 
 
 	return 0;

@@ -1,3 +1,6 @@
+// this file is a practice file to learn the read() and write() functions,
+// which will be used in our server
+
 #include <fcntl.h> // file control. this is what contains constants like O_RDONLY
 #include <unistd.h>
 #include <stdio.h>
