@@ -49,6 +49,33 @@ int main() {
 		return 1;
 	}
 
+	// LISTEN
+
+	int listening = listen(sockfd, 3);
+	// the second argument: the number of pending requests that can wait at a time
+	// returns 0 for success, -1 for error
+
+	if (listening == -1) {
+		perror("Listen failed.\n");
+		return 1;
+	}
+
+	// ACCEPT
+
+	struct sockaddr_in6 my_client_address;
+
+	int clientfd = accept(sockfd, 
+		(struct sockaddr *) &my_client_address, // type casting, just like bind
+		&sizeof(my_client_address) // slightly different froom bind: the argument is an address
+		);
+
+	// returns a file descriptor for the client socket (or -1 in case of an error)
+
+	if (clientfd == -1) {
+		perror("Accept failed.\n");
+		return 1;
+	}
+
 
 
 
